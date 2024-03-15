@@ -76,43 +76,64 @@ public class Bank {
     }
 
     public boolean withdrawMoney(long userId, long accountId, long amount, History history) {
-        OperationStatus res = usersRepository
+        Optional<IBankAccount> res = usersRepository
                 .getUserAccounts()
                 .get(userId)
                 .stream()
                 .filter(account -> account.getAccountId() == accountId)
-                .toList().get(0).removeMoney(amount);
-        history.addOperation(OperationType.WITHDRAW, res, bankId, userId, accountId, amount, Optional.empty(), Optional.empty(), Optional.empty());
-        return switch (res) {
+                .findFirst();
+        if(res.isEmpty()) {
+            return false;
+        }
+        OperationStatus status = res.get().removeMoney(amount);
+        history.addOperation(OperationType.WITHDRAW, status, bankId, userId, accountId, amount, Optional.empty(), Optional.empty(), Optional.empty());
+        return switch (status) {
             case SUCCESS -> true;
             case FAIL -> false;
         };
     }
 
     public void putMoney(long userId, long accountId, long amount, History history) {
-        usersRepository
+        Optional<IBankAccount> res = usersRepository
                 .getUserAccounts()
                 .get(userId)
                 .stream()
                 .filter(account -> account.getAccountId() == accountId)
-                .toList().get(0).addMoney(amount);
+                .findFirst();
+        if (res.isEmpty()) {
+            log.error("Нет такого аккаунта");
+            history.addOperation(OperationType.PUT, OperationStatus.FAIL, bankId, userId, accountId, amount, Optional.empty(), Optional.empty(), Optional.empty());
+            return;
+        }
+        res.get().addMoney(amount);
         history.addOperation(OperationType.PUT, OperationStatus.SUCCESS, bankId, userId, accountId, amount, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     public void transferMoney(long fromId, long fromAccountId, long toId, long toAccountId, long amount, History history) {
-        OperationStatus res = usersRepository
+        Optional<IBankAccount> res = usersRepository
                 .getUserAccounts()
                 .get(fromId)
                 .stream()
                 .filter(account -> account.getAccountId() == fromAccountId)
-                .toList().get(0).removeMoney(amount);
-        usersRepository
+                .findFirst();
+        if (res.isEmpty()) {
+            log.error("Нет такого аккаунта");
+            history.addOperation(OperationType.TRANSFER, OperationStatus.FAIL, bankId, fromId, fromAccountId, amount, Optional.empty(), Optional.of(toId), Optional.of(toAccountId));
+            return;
+        }
+        OperationStatus status = res.get().removeMoney(amount);
+        res = usersRepository
                 .getUserAccounts()
                 .get(toId)
                 .stream()
                 .filter(account -> account.getAccountId() == toAccountId)
-                .toList().get(0).addMoney(amount);
-        history.addOperation(OperationType.TRANSFER, res, bankId, fromId, fromAccountId, amount, Optional.empty(), Optional.of(toId), Optional.of(toAccountId));
+                .findFirst();
+        if (res.isEmpty()) {
+            log.error("Нет такого маккаунта");
+            return;
+        }
+        res.get().addMoney(amount);
+        history.addOperation(OperationType.TRANSFER, status, bankId, fromId, fromAccountId, amount, Optional.empty(), Optional.of(toId), Optional.of(toAccountId));
     }
 
     public long checkPotentialBalance(long userId, long accountId, Duration time) {
