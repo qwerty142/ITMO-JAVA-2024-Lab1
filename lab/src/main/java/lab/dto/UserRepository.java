@@ -1,9 +1,8 @@
 package lab.dto;
 
-import lombok.AllArgsConstructor;
+import lab.domain.IBankAccount;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
-import lab.domain.IBankAccount;
 
 import java.util.*;
 

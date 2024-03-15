@@ -1,13 +1,12 @@
 package lab.domain;
 
+import lab.dto.BankAdmin;
 import lab.dto.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import lab.dto.BankAdmin;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 @Log4j2

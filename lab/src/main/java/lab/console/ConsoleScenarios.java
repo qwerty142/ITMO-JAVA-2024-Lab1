@@ -20,7 +20,7 @@ public final class ConsoleScenarios {
         }
 
         int input = in.nextInt();
-        state.bank = state.centralBank.getBanks().get(input);
+        state.setBank(state.centralBank.getBanks().get(input));
     }
 
     public static void createBankScenario(State state) throws IOException {
@@ -42,13 +42,13 @@ public final class ConsoleScenarios {
         System.out.println("Придумайте пароль для админа банка");
 
         state.centralBank.createBank(ref.finalBankId, password);
-        state.bank = state
+        state.setBank(state
                 .centralBank
                 .getBanks()
                 .stream()
                 .filter(bank -> bank.getBankId() == ref.finalBankId)
                 .toList()
-                .get(0);
+                .get(0));
 
     }
 
@@ -77,7 +77,7 @@ public final class ConsoleScenarios {
 
         System.out.println("Введите ваш уникальный номер");
         long id = in.nextLong();
-        state.userId = id;
+        state.setUserId(id);
     }
 
     public static void putMoneyOnAccountScenario(State state) {
@@ -200,5 +200,4 @@ public final class ConsoleScenarios {
 
         state.bank.addBankAccount(state.userId, accountType);
     }
-
 }
