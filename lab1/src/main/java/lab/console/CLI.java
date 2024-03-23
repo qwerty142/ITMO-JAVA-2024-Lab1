@@ -17,7 +17,9 @@ public class CLI {
                 "transfer money'\n'" +
                 "ban user account'\n'" +
                 "base operations'\n'" +
-                "create bank account'\n'");
+                "create bank account'\n'" +
+                "set commission in bank account'\n'" +
+                "set coefficient in bank account'\n'");
         while(input != "escape") {
             parseInput(input);
         }
@@ -35,6 +37,8 @@ public class CLI {
             case "ban user account" -> ConsoleScenarios.banUserAccountScenario(state);
             case "base operations" -> ConsoleScenarios.baseOperationsWithAccountScenario(state);
             case "create bank account" -> ConsoleScenarios.createBankAccountScenario(state);
+            case "set commission in bank account" -> ConsoleScenarios.setCommissionScenario(state);
+            case "set coefficient in bank account" -> ConsoleScenarios.setCoefficientScenario(state);
             default -> System.out.println("Нет такой операции");
         }
     }

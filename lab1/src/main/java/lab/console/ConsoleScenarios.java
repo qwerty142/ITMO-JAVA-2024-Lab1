@@ -200,4 +200,20 @@ public final class ConsoleScenarios {
 
         state.bank.addBankAccount(state.userId, accountType);
     }
+
+    public static void setCoefficientScenario(State state) {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Введите число которое вы хотите поставить и id аккаунта");
+        double coef = in.nextDouble();
+        long accountId = in.nextLong();
+        state.bank.setCoefficientInBankAccount(state.userId, accountId, coef);
+    }
+
+    public static void setCommissionScenario(State state) {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Введите число которое вы хотите поставить и id аккаунта");
+        double coef = in.nextDouble();
+        long accountId = in.nextLong();
+        state.bank.setCommissionInBankAccount(state.userId, accountId, coef);
+    }
 }

@@ -78,4 +78,28 @@ public class WorkTestDomain {
         assertThat(userRepository.getUserAccounts().get(id).get(0).getBalance()).isEqualTo(BigDecimal.valueOf(1.0));
     }
 
+    static Stream<Arguments> BankTestsTransferOperation () {
+        return Stream.of(
+                Arguments.of(0, 1, 0, 0, 2, 4, AccountType.CREDIT),
+                Arguments.of(0, 1, 0, 0, 2, 4, AccountType.DEBIT)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("BankTestsTransferOperation")
+    public void bankOperationTransferMoneyTests(long id, long toId, long accountId, long toAccountId, long amount, long baseBalance, AccountType accountType) {
+        History history = new History(new ArrayList<>());
+        UserRepository userRepository = new UserRepository();
+        Bank bank = new Bank(userRepository, "1", "1", 0L, null);
+        bank.createUser("d", "d", Optional.of(1L), "h".describeConstable());
+        bank.createUser("gh", "d", Optional.of(1L), "h".describeConstable());
+        bank.addBankAccount(id, accountType);
+        bank.addBankAccount(toId, accountType);
+        bank.putMoney(id, accountId, baseBalance, history);
+        bank.putMoney(toId, toAccountId, baseBalance, history);
+        bank.transferMoney(id, accountId, toId, toAccountId, amount, history);
+        assertThat(userRepository.getUserAccounts().get(id).get(0).getBalance()).isEqualTo(BigDecimal.valueOf(2.0));
+        assertThat(userRepository.getUserAccounts().get(toId).get(0).getBalance()).isEqualTo(BigDecimal.valueOf(6));
+    }
+
 }

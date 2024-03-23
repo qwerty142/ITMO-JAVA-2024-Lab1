@@ -22,13 +22,16 @@ public class BankAdmin {
     }
 
     public void banAccount(long userId, long accountId, UserRepository repository) {
-        repository
+        IBankAccount account = repository
                 .getUserAccounts().
                 get(userId)
                 .stream()
                 .filter(account -> account.getAccountId() == accountId)
-                .toList()
-                .get(0)
-                .setBlockStatus(true);
+                .findFirst();
+        if(account.isEmpty()) {
+            log.error("Такого пользователя не существует");
+        }
+
+        account.setBlockStatus(true);
     }
 }

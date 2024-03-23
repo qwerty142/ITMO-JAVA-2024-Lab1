@@ -38,6 +38,7 @@ public class Bank {
             Optional<Long> pasportSerie,
             Optional<String> email) {
         usersRepository.createUser(userId, name, lastName, pasportSerie, email);
+        userId++;
     }
 
     public void addBankAccount(Long id, AccountType accountType) {
@@ -52,7 +53,8 @@ public class Bank {
                             ,usersRepository.getIdForNewAccount(id)
                             ,id
                         , OffsetDateTime.MIN
-                        , false));
+                        , false
+                        , 1.15));
             case CREDIT:
                 usersRepository.addBankAccount(id
                         ,new CreditBankAccount(BigDecimal.ZERO
@@ -170,5 +172,55 @@ public class Bank {
 
         BigDecimal result = bankAccountCheck.get().getBalance();
         return result.longValue();
+    }
+
+    public void setCoefficientInBankAccount(long userId, long accountId, double coefficient) {
+        if (!bankAdmin.isLoginStatus()) {
+            log.error("Чтобы изменить параметры банковских аккаунтов, нужно быть админом");
+        }
+        List<IBankAccount> accounts = usersRepository.getUserAccounts().getOrDefault(userId, List.of());
+        if(accounts.isEmpty()) {
+            log.error("Неправильный логин юзера или юзера нет аккаунтов");
+            return;
+        }
+
+        Optional<IBankAccount> bankAccountCheck = accounts.stream().filter(account -> account.getAccountId() == accountId).findFirst();
+        if(bankAccountCheck.isEmpty()) {
+            log.error("Такого аккаунта нет");
+            return;
+        }
+
+        IBankAccount bankAccount = bankAccountCheck.get();
+
+        switch (bankAccount.getAccountType()) {
+            case DEBIT -> ((DebitBankAccount) bankAccount).setCoefficient(coefficient);
+            case CREDIT -> ((CreditBankAccount) bankAccount).setAdditionalCoefficient(coefficient);
+            case DEPOSIT -> ((DepositBankAccount) bankAccount).setCoefficient(coefficient);
+            default -> log.error("Нет таких аккаунтов");
+        }
+    }
+
+    public void setCommissionInBankAccount(long userId, long accountId, double commission) {
+        if (!bankAdmin.isLoginStatus()) {
+            log.error("Чтобы изменить параметры банковских аккаунтов, нужно быть админом");
+        }
+        List<IBankAccount> accounts = usersRepository.getUserAccounts().getOrDefault(userId, List.of());
+        if(accounts.isEmpty()) {
+            log.error("Неправильный логин юзера или юзера нет аккаунтов");
+            return;
+        }
+
+        Optional<IBankAccount> bankAccountCheck = accounts.stream().filter(account -> account.getAccountId() == accountId).findFirst();
+        if(bankAccountCheck.isEmpty()) {
+            log.error("Такого аккаунта нет");
+            return;
+        }
+
+        IBankAccount bankAccount = bankAccountCheck.get();
+
+        switch (bankAccount.getAccountType()) {
+            case CREDIT -> ((CreditBankAccount) bankAccount).setAdditionalCoefficient(commission);
+            default -> log.error("Нет таких аккаунтов");
+        }
     }
 }

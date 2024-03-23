@@ -2,24 +2,32 @@ package lab.domain;
 
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+
 @AllArgsConstructor
 @Log4j2
-public class DebitBankAccount implements IBankAccount {
+@Setter
+public class CreditBankAccount implements IBankAccount {
     private BigDecimal cuurentAmountOfMoney;
     private Long accountId;
     private Long userId;
     private OffsetDateTime timeOfLastIncomeOfMoney;
+    private Long creditLimit;
+    private double commission = 1.15;
+    private double additionalCoefficient = 0.005;
     private boolean blockStatus = false;
+
     @Override
     public BigDecimal checkPotentialBalance(Duration time) {
-        long diff = (time.getSeconds())/(60*60*24*30);
-        return cuurentAmountOfMoney.multiply(BigDecimal.valueOf(1.15 * diff));
+        return cuurentAmountOfMoney
+                .multiply(BigDecimal.valueOf(commission + time.getSeconds()*additionalCoefficient/60D/60D));
     }
 
     @Override
@@ -34,17 +42,15 @@ public class DebitBankAccount implements IBankAccount {
 
     @Override
     public OperationStatus removeMoney(@NonNull @Min(0) Long amount) {
-        if (cuurentAmountOfMoney.longValue() < amount) {
-            log.error("Сумма превышает лимит");
-            return OperationStatus.FAIL;
-        }
-
         if (blockStatus) {
-            log.error("пользователь заблокирован");
+            log.error("Аккаунт заблокирован");
             return OperationStatus.FAIL;
         }
-
-        cuurentAmountOfMoney = BigDecimal.valueOf(cuurentAmountOfMoney.doubleValue() - amount.doubleValue());
+        if (cuurentAmountOfMoney.longValue() > creditLimit) {
+            log.error("Превышен лимит");
+            return OperationStatus.FAIL;
+        }
+        cuurentAmountOfMoney = BigDecimal.valueOf(cuurentAmountOfMoney.doubleValue() - amount);
         return OperationStatus.SUCCESS;
     }
 
@@ -60,6 +66,6 @@ public class DebitBankAccount implements IBankAccount {
 
     @Override
     public AccountType getAccountType() {
-        return AccountType.DEBIT;
+        return AccountType.CREDIT;
     }
 }

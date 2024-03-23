@@ -2,7 +2,9 @@ package lab.domain;
 
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.math.BigDecimal;
@@ -11,18 +13,19 @@ import java.time.OffsetDateTime;
 
 @AllArgsConstructor
 @Log4j2
+@Setter
 public class DepositBankAccount implements IBankAccount {
     private BigDecimal cuurentAmountOfMoney;
     private Long accountId;
     private Long userId;
     private OffsetDateTime timeOfStart;
     private Long timeOfDeposit;
-    private double percent;
+    private double coefficient;
     private boolean blockStatus = false;
     @Override
     public BigDecimal checkPotentialBalance(Duration time) {
         return BigDecimal.valueOf(
-                (1D + (percent/100D))*cuurentAmountOfMoney.doubleValue()
+                coefficient*cuurentAmountOfMoney.doubleValue()
         );
     }
 
